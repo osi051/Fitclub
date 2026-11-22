@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="tg"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FitClub</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f5f6f8;--cd:#fff;--tx:#14181f;--mu:#667085;--ac:#e8590c;--bd:#e3e6eb;--rd:#d92d20;--yl:#f0a000;--gr:#16a34a}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1318;--cd:#1a2029;--tx:#eef1f5;--mu:#98a2b3;--bd:#2a323d}}
+:root[data-theme="dark"]{--bg:#0f1318;--cd:#1a2029;--tx:#eef1f5;--mu:#98a2b3;--bd:#2a323d}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+.w{max-width:560px;margin:0 auto;padding:14px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+header b{font-size:22px;color:var(--ac)}
+button,input{font:inherit;color:inherit}
+.nb{background:var(--cd);border:1px solid var(--bd);border-radius:10px;padding:8px 12px;margin-left:6px;cursor:pointer}
+.big{display:block;width:100%;background:var(--cd);border:1px solid var(--bd);border-radius:18px;padding:26px 16px;margin:0 0 12px;cursor:pointer;text-align:center}
+.big b{display:block;font-size:26px}.big small{display:block;margin-top:6px;color:var(--mu);font-size:14px}
+.pl{display:flex;justify-content:space-between;align-items:center;width:100%;background:var(--cd);border:1px solid var(--bd);border-radius:16px;padding:20px 18px;margin-bottom:12px;cursor:pointer;font-size:18px}
+.pl b{color:var(--ac);font-size:20px}
+.card{background:var(--cd);border:1px solid var(--bd);border-radius:16px;padding:14px;margin-bottom:12px}
+h2{margin:6px 0 12px;font-size:20px}
+input{width:100%;padding:12px;border:1px solid var(--bd);border-radius:10px;background:var(--bg);margin-bottom:10px}
+.pb{background:var(--ac);color:#fff;border:0;border-radius:12px;padding:13px;width:100%;cursor:pointer;font-weight:600}
+.gh{background:none;border:0;color:var(--mu);cursor:pointer;padding:6px 0;margin-bottom:8px}
+.mu{color:var(--mu);font-size:14px}
+.bar{height:10px;border-radius:6px;background:var(--bd);overflow:hidden;margin:8px 0}.bar i{display:block;height:100%}
+.row{display:flex;gap:8px;align-items:center;justify-content:space-between}
+.dot{width:14px;height:14px;border-radius:50%;flex:none}
+.chip{display:inline-block;padding:3px 9px;border-radius:20px;font-size:13px;color:#fff}
+.tabs{display:flex;gap:8px;margin-bottom:12px}.tabs button{flex:1;padding:10px;border-radius:10px;border:1px solid var(--bd);background:var(--cd);cursor:pointer}.tabs .on{background:var(--ac);color:#fff;border-color:var(--ac)}
+.g{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.d{padding:8px 0;text-align:center;border-radius:8px;border:1px solid var(--bd);font-size:12px;cursor:pointer;background:var(--bg)}
+.d.off{opacity:.35;cursor:default}
+.msg{padding:10px;border-radius:10px;background:var(--rd);color:#fff;margin:8px 0}
+.two{display:flex;gap:8px}.two button{flex:1}
+.sm{padding:10px;border:0;border-radius:10px;color:#fff;cursor:pointer;font-weight:600}
+.err{color:var(--rd);font-size:14px;margin:0 0 8px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.fd{text-align:center;font-size:13px;padding:10px 4px;border:1px solid var(--bd);border-radius:12px;background:var(--bg)}.em{font-size:38px;line-height:1.2}
+</style></head><body><div class="w"><header><b>🏋️ FitClub</b><div><button class="nb" onclick="go('home')">Асосӣ</button><button class="nb" onclick="go('prof')">Профил</button><button class="nb" onclick="go('adm')">Админ</button></div></header><div id="app"></div></div>
+<script>
+const PIN='1234'; // рамзи админро иваз кунед
+const SL={s:{n:'Саҳар',t:'аз 09:00 то 13:00',p:[['Як руз пас',130,30,2],['Ҳарруза',180,30,1],['Як руза',10,1,1]]},
+r:{n:'Рӯзона',t:'аз 13:00 то 17:00',p:[['Як руз пас',170,30,2],['Ҳарруза',230,30,1],['Як руза',15,1,1]]},
+b:{n:'Бегоҳ',t:'аз 17:00 то 22:00',p:[['Як руз пас',200,30,2],['Ҳарруза',270,30,1],['Як руза',20,1,1]]}};
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ymd=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const par=s=>{const[a,b,c]=s.split('-').map(Number);return new Date(a,b-1,c)};
+const addD=(s,n)=>{const d=par(s);d.setDate(d.getDate()+n);return ymd(d)};
+const dif=(a,b)=>Math.round((par(b)-par(a))/864e5);
+const today=()=>ymd(new Date());
+const fd=s=>s.slice(8)+'.'+s.slice(5,7);
+const fy=s=>s.slice(8)+'.'+s.slice(5,7)+'.'+s.slice(0,4);
+let S={members:{},orders:{}},db=null,V={v:'home'},me=null,adm=false,tab='req',pend=null,err='',toast='';
+try{const l=JSON.parse(localStorage.getItem('fit'));if(l)S=l;me=localStorage.getItem('fit_me')}catch(e){}
+function persist(){try{localStorage.setItem('fit',JSON.stringify(S))}catch(e){}}
+function put(c,id,o){S[c][id]=o;if(db)db.collection(c).doc(id).set(o).catch(()=>{});else persist();draw()}
+(async()=>{try{if(!window.claude)return;const d=await claude.use('db');if(!d)return;db=d;
+['members','orders'].forEach(c=>db.collection(c).onSnapshot(sn=>{const m={};sn.docs.forEach(x=>m[x.id]=typeof x.data==='function'?x.data():x.data);S[c]=m;draw()},()=>{}))}catch(e){}})();
+function go(v,a){V={v,a};err='';toast='';draw();scrollTo(0,0)}
+function info(o){if(o.status!=='active')return null;const t=today(),rem=Math.max(0,dif(t,o.end)+1),fr=Math.min(1,rem/o.total);
+return{rem,fr,done:t>o.end,last:t===o.end,col:`hsl(${Math.round(120*fr)} 72% 42%)`}}
+const payCol=o=>(o.paid||0)<=0?'var(--rd)':o.paid<o.price?'var(--yl)':'var(--gr)';
+const payTx=o=>(o.paid||0)<=0?'Супорида нашуд':o.paid<o.price?`Қисман: ${o.paid}/${o.price} с`:'Пурра пардохт шуд';
+const nm=o=>`${SL[o.slot].n} · ${o.plan}`;
+function bar(i){return`<div class="bar"><i style="width:${Math.max(3,i.fr*100)}%;background:${i.col}"></i></div>`}
+function endMsg(i){return(i.last||i.done)?`<div class="msg">Курси ин тамом шудааст</div>`:''}
+function draw(){const a=$('#app');const v=V.v;
+a.innerHTML=({home:H,slot:Sl,auth:Au,conf:Cf,prof:Pr,adm:Ad,top:TP,bad:()=>FL('🍔 Ғизои носолим',BD,'var(--rd)'),good:()=>FL('🥗 Хӯрокҳои солим',GD2,'var(--gr)')})[v]();}
+function H(){return`<h2>Вақтро интихоб кунед</h2>`+Object.keys(SL).map(k=>`<button class="big" onclick="go('slot','${k}')"><b>${SL[k].n}</b><small>${SL[k].t}</small></button>`).join('')}
+function Sl(){const k=V.a,s=SL[k];return`<button class="gh" onclick="go('home')">← Бозгашт</button><h2>${s.n} <span class="mu">${s.t}</span></h2>`+s.p.map((p,i)=>`<button class="pl" onclick="pick('${k}',${i})"><span>${p[0]}</span><b>${p[1]} с</b></button>`).join('')}
+function pick(k,i){pend={k,i};if(me&&S.members[me])go('conf');else go('auth')}
+function Au(){return`<button class="gh" onclick="go('home')">← Бозгашт</button><div class="card"><div class="tabs"><button class="${V.a!=='in'?'on':''}" onclick="go('auth','up')">Регистратсия</button><button class="${V.a==='in'?'on':''}" onclick="go('auth','in')">Ворид шудан</button></div>
+${V.a==='in'?'':'<input id="nm" placeholder="Ном">'}<input id="ph" type="tel" inputmode="tel" placeholder="Рақами телефон"><input id="cd" type="password" inputmode="numeric" maxlength="4" placeholder="Коди 4 рақама"><p class="err">${esc(err)}</p><button class="pb" onclick="${V.a==='in'?'login()':'reg()'}">${V.a==='in'?'Ворид шудан':'Сабти ном'}</button></div>`}
+function reg(){const n=$('#nm').value.trim(),p=$('#ph').value.replace(/\D/g,''),c=$('#cd').value.trim();
+if(!n||p.length<7||!/^\d{4}$/.test(c)){err='Ном, телефон ва коди 4 рақамаро пур кунед';return draw2()}
+if(S.members[p]){err='Ин рақам аллакай сабт шудааст — ворид шавед';return draw2()}
+me=p;try{localStorage.setItem('fit_me',p)}catch(e){}put('members',p,{name:n,phone:p,code:c,weights:[]});go(pend?'conf':'prof')}
+function login(){const p=$('#ph').value.replace(/\D/g,''),c=$('#cd').value.trim(),m=S.members[p];
+if(!m||m.code!==c){err='Рақам ё код нодуруст аст';return draw2()}
+me=p;try{localStorage.setItem('fit_me',p)}catch(e){}go(pend?'conf':'prof')}
+function draw2(){const a=$('#ph').value,n=$('#nm')?$('#nm').value:'';draw();$('#ph').value=a;if($('#nm'))$('#nm').value=n}
+function Cf(){if(!pend)return Pr();const s=SL[pend.k],p=s.p[pend.i];return`<button class="gh" onclick="go('slot','${pend.k}')">← Бозгашт</button><div class="card"><h2>Тасдиқи харид</h2><p><b>${s.n}</b> <span class="mu">${s.t}</span><br>${p[0]} — <b>${p[1]} с</b></p><button class="pb" onclick="buy()">Харидан</button></div>`}
+function buy(){const s=SL[pend.k],p=s.p[pend.i],m=S.members[me];const id=Date.now().toString(36);
+put('orders',id,{id,phone:me,name:m.name,slot:pend.k,plan:p[0],price:p[1],total:p[2],step:p[3],status:'pending',created:today(),paid:0,att:{}});pend=null;toast='Дархост ба админ фиристода шуд. Интизори тасдиқ бошед.';go('prof');toast='Дархост ба админ фиристода шуд. Интизори тасдиқ бошед.';draw()}
+function Pr(){if(!me||!S.members[me])return Au.call(0,V.a='in');const m=S.members[me];
+const os=Object.values(S.orders).filter(o=>o.phone===me).sort((a,b)=>b.created.localeCompare(a.created));
+const act=os.some(o=>o.status==='active');
+return`${toast?`<div class="card" style="border-color:var(--gr)">${toast}</div>`:''}<div class="row"><h2>${esc(m.name)}</h2><button class="nb" onclick="out()">Баромадан</button></div>`+
+FB()+(os.length?os.map(o=>{const i=info(o);let b;
+if(o.status==='pending')b='<span class="mu">⏳ Интизори тасдиқи админ</span>';
+else if(o.status==='rejected')b='<span class="mu">❌ Рад шуд</span>';
+else b=`${bar(i)}<div class="mu">${fy(o.start)} — ${fy(o.end)} · ${i.done?'тамом шуд':i.rem+' рӯз монд'}</div>${endMsg(i)}<div style="margin-top:8px"><span class="chip" style="background:${payCol(o)}">${payTx(o)}</span></div>`;
+return`<div class="card"><b>${nm(o)}</b> <span class="mu">· ${o.price} с</span><br>${b}</div>`}).join(''):'<p class="mu">Ҳоло курс нест. Аз саҳифаи асосӣ интихоб кунед.</p>')+
+(act?W(m)+DT(m,os):'')}
+function W(m){const w=m.weights||[];let L='';
+for(let i=w.length-1;i>=0;i--){const d=i?+(w[i].kg-w[i-1].kg).toFixed(1):0;
+L+=`<div class="row" style="padding:6px 0;border-top:1px solid var(--bd)"><span class="mu">${fy(w[i].d)}</span><b>${w[i].kg} кг</b><span style="color:${d<0?'var(--gr)':d>0?'var(--rd)':'var(--mu)'}">${i?(d<0?'▼ '+Math.abs(d)+' кг кам':d>0?'▲ '+d+' кг зиёд':'бетағйир'):'аввал'}</span></div>`}
+const tot=w.length>1?+(w[w.length-1].kg-w[0].kg).toFixed(1):null;
+return`<div class="card"><h2>Вазни ман</h2><div class="two"><input id="kg" type="number" step="0.1" inputmode="decimal" placeholder="Вазн (кг)" style="margin:0"><button class="pb" style="flex:none;width:auto" onclick="addW()">Сабт</button></div>
+${tot!==null?`<p>Аз аввал: <b style="color:${tot<0?'var(--gr)':'var(--rd)'}">${tot<0?Math.abs(tot)+' кг кам шудед':tot>0?tot+' кг зиёд шудед':'бетағйир'}</b></p>`:''}<div style="margin-top:8px">${L}</div></div>`}
+function addW(){const k=parseFloat($('#kg').value);if(!k||k<20||k>400)return;const m=S.members[me],t=today(),w=(m.weights||[]).filter(x=>x.d!==t);w.push({d:t,kg:k});w.sort((a,b)=>a.d.localeCompare(b.d));put('members',me,{...m,weights:w})}
+const GY=[['Субҳ','2 тухми ҷӯшонда, ҷӯши чавдор ё булғур бо об, чойи беқанд'],['Нисфирӯзӣ','100–150 г сина мурғ ё гӯшти ҷӯшонда, гречка ё биринҷи қаҳваранг (1 косача), салати сабзавот'],['1 соат пеш аз машқ','1 банан ё 1 себ'],['Баъд аз машқ','Творог ё қатиқи беқанд, 1 тухм'],['Шом (то 19:00)','Моҳӣ ё мурғи дамшуда, сабзавоти ҷӯшонда ё салат, бе нон'],['Нӯшидан','2–2,5 литр об']];
+const RS=[['Субҳ','Омлет аз 2 тухм бо сабзавот, 1 пораи хурди нони сиёҳ'],['Нисфирӯзӣ','Шӯрбои сабзавот ё мурғ (бе равған), салат'],['Дар байн','1 мева ё як мушт чормағз'],['Шом','Творог ё қатиқи беқанд бо сабзавот'],['Нӯшидан','2–2,5 литр об, чойи сабз']];
+const GD=['Машқи зал бо нақша, 60–90 дақиқа','Баъд аз зал 5–10 дақиқа кашишдиҳӣ'];
+const RD=['Пиёдагардӣ 40–60 дақиқа (тақрибан 8–10 ҳазор қадам)','Кашишдиҳӣ ва 15 дақиқа машқҳои сабук (планка, ғӯза)','Хоб 7–8 соат — барои кам шудани вазн муҳим'];
+const AV=['Нон ва ширинӣ, қанд','Нӯшокии газдор ва шарбат','Фастфуд ва хӯроки бирёншуда','Хӯрок пас аз 20:00'];
+function DT(m,os){const w=m.weights||[];if(!w.length)return'';
+const a=os.find(o=>o.status==='active'&&info(o)&&!info(o).done);const t=today();
+const gym=d=>a?(d>=a.start&&d<=a.end&&dif(a.start,d)%a.step===0):true;
+const d=w.length>1?+(w[w.length-1].kg-w[w.length-2].kg).toFixed(1):0;
+const tip=w.length<2?'Вазни аввал сабт шуд. Аз имрӯз ба нақша амал кунед.':d<0?'Офарин! Вазн кам шуд — ҳамин тавр давом диҳед.':d>0?'Вазн зиёд шуд. Нон ва ширинӣ камтар, шом сабуктар бошад ва об бештар нӯшед.':'Вазн бетағйир монд. Андозаи хӯрокро каме кам кунед ва қадамро зиёд кунед.';
+const dc=(l,x)=>{const g=gym(x);return`<div class="card"><h2>${l}: ${g?'рӯзи зал 🏋️':'рӯзи дам 🚶'}</h2>`+(g?GM(x):RM(x)).map(r=>`<div style="padding:6px 0;border-top:1px solid var(--bd)"><b>${r[0]}</b><div class="mu">${r[1]}</div></div>`).join('')+`<div style="padding:6px 0;border-top:1px solid var(--bd)"><b>Кор</b><div class="mu">${(g?GK(x):RK(x)).join('<br>')}</div></div></div>`};
+return`<div class="card"><h2>Диета барои кам кардани вазн</h2><p>${tip}</p><p class="mu">Суръати бехатар: 0,5–1 кг дар як ҳафта.</p></div>`+dc('Имрӯз',t)+dc('Пагоҳ (аз ҳоло тайёрӣ бинед)',addD(t,1))+`<div class="card"><h2>Нахӯред</h2><div class="mu">${AV.join('<br>')}</div><p class="mu">Ин маслиҳати умумӣ аст. Агар бемории музмин доред, аввал бо духтур машварат кунед.</p></div>`}
+const BD=[['Шириниҳо',[['🍰','Торт'],['🍩','Донат'],['🍫','Шоколад'],['🍬','Конфет'],['🍪','Печенье'],['🍦','Яхмос'],['🧁','Кекс'],['🍯','Қанд ва асал зиёд']]],
+['Нӯшокиҳо',[['🥤','Нӯшокии газдор'],['🧃','Шарбати бастабандӣ'],['🍺','Нӯшокии спиртӣ'],['☕','Қаҳва бо қанд ва қаймоқ']]],
+['Фастфуд ва равғанӣ',[['🍔','Бургер'],['🍟','Картошкаи фри'],['🍕','Питса'],['🌭','Хот-дог'],['🍗','Мурғи бирён'],['🥓','Колбаса, сосиска'],['🍿','Чипс'],['🥐','Нони равғанӣ']]],
+['Хамирӣ',[['🥟','Самбуса'],['🍞','Нони сафед'],['🍜','Макарони равғанӣ'],['🍚','Палави равғанӣ зиёд']]],
+['Шӯрҳо ва соусҳо',[['🥫','Консерва'],['🐟','Моҳии шӯр'],['🧀','Панири шӯр'],['🧂','Намаки зиёд'],['🍅','Кетчуп'],['🥚','Майонез']]]];
+const GD2=[['Сабзавот',[['🥦','Брокколи'],['🥒','Бодиринг'],['🍅','Помидор'],['🥕','Сабзӣ'],['🥬','Карам, салат'],['🫑','Қаланфури булғорӣ']]],
+['Мева',[['🍎','Себ'],['🍊','Афлесун'],['🍓','Тамашк'],['🍌','Банан (1 дона)'],['🍐','Нок'],['🍇','Ангур (андаке)']]],
+['Сафедаӣ',[['🥚','Тухм'],['🍗','Сина мурғ'],['🐟','Моҳӣ'],['🥩','Гӯшти ҷӯшона'],['🥛','Қатиқи беқанд'],['🧀','Творог']]],
+['Ғалла ва лӯбиё',[['🥣','Ҷӯши чавдор'],['🍚','Биринҷи қаҳваранг'],['🌾','Гречка'],['🍞','Нони сиёҳ'],['🫘','Лӯбиё, наск']]],
+['Чормағз ва равған',[['🥜','Чормағз, бодом (1 мушт)'],['🫒','Равғани зайтун (андак)']]],
+['Нӯшидан',[['💧','Об 2–2,5 литр'],['🍵','Чойи сабз бе қанд']]]];
+const M5=(a,b,c,d,e)=>[['Субҳ',a],['Нисфирӯзӣ',b],['Пеш аз машқ',c],['Баъд аз машқ',d],['Шом',e]];
+const R4=(a,b,c,d)=>[['Субҳ',a],['Нисфирӯзӣ',b],['Дар байн',c],['Шом',d]];
+const GYM=[M5('2 тухми ҷӯшонда, ҷӯши чавдор','Сина мурғ, гречка, салати сабзавот','1 банан','Творог','Моҳии дамшуда, сабзавоти ҷӯшонда'),
+M5('Омлет бо помидор, 1 порча нони сиёҳ','Гӯшти гови ҷӯшонда, биринҷи қаҳваранг, бодиринг','1 себ','Қатиқи беқанд, 1 тухм','Мурғи дамшуда, брокколи'),
+M5('Творог бо тамашк ё себ','Шӯрбои мурғ (бе равған), салат','2–3 хурмо','1 стакан шир, 1 тухм','Лӯбиёи ҷӯшонда, салати карам'),
+M5('Ҷӯши булғур, 1 тухм','Моҳӣ, 1–2 картошкаи ҷӯшонда, салат','1 афлесун','Творог','Сина мурғ, карам ва сабзӣ'),
+M5('2 тухм, бодиринг, нони сиёҳ','Гӯшти ҷӯшонда, гречка, сабзии ҷӯшонда','1 банан','Қатиқ, як мушт чормағз','Моҳӣ, салати сабзавот'),
+M5('Ҷӯши чавдор бо шир, 1 себ','Мурғи ҷӯшонда, биринҷи қаҳваранг, карам','1 нок','Творог, 1 тухм','Шӯрбои сабзавот, пораи гӯшти ҷӯшонда'),
+M5('Омлет бо сабзавот','Наск, гӯшти ҷӯшонда, салат','1 себ','Қатиқи беқанд','Моҳии дамшуда, брокколи')];
+const RST=[R4('Ҷӯши чавдор бо об, 1 себ','Шӯрбои сабзавот, салат','Як мушт чормағз','Творог'),
+R4('Омлет аз 2 тухм бо сабзавот','Сина мурғи ҷӯшонда, салати карам','1 афлесун','Қатиқи беқанд'),
+R4('Творог бо мева','Шӯрбои лӯбиё (бе равған)','1 бодиринг ва 1 помидор','Моҳии дамшуда, салат'),
+R4('2 тухми ҷӯшонда, нони сиёҳ','Гӯшти ҷӯшонда, сабзавоти ҷӯшонда','1 нок','Қатиқ бо бодиринг'),
+R4('Ҷӯши булғур бо об','Мурғи дамшуда, салат','1 себ','Шӯрбои сабзавот'),
+R4('Қатиқ, 1 банан','Шӯрбои мурғ, карам','Як мушт бодом','Омлет бо помидор'),
+R4('Творог, 1 тухм','Моҳӣ, салати сабзавот','1 афлесун','Сабзавоти ҷӯшонда, пораи мурғ')];
+const GWK=[['Сина ва дастҳо — 60 дақиқа','Кардио 15 дақиқа дар охир','Кашишдиҳӣ 5–10 дақиқа'],['Пушт ва бозуҳо — 60 дақиқа','Кардио 15 дақиқа','Кашишдиҳӣ 5–10 дақиқа'],['Пойҳо (чоккӣ, пеш) — 60 дақиқа','Кардио 10 дақиқа','Кашишдиҳӣ 10 дақиқа'],['Китфҳо ва шикам — 60 дақиқа','Планка 3 маротиба','Кашишдиҳӣ 5–10 дақиқа'],['Кардио 40 дақиқа (давидан ё велосипед)','Шикам 15 дақиқа','Кашишдиҳӣ 10 дақиқа'],['Тамоми бадан (давр) — 50 дақиқа','Кардио 15 дақиқа','Кашишдиҳӣ 10 дақиқа'],['Пушт ва сина — 60 дақиқа','Кардио 20 дақиқа','Кашишдиҳӣ 10 дақиқа']];
+const RWK=[['Пиёдагардӣ 40–60 дақиқа (8–10 ҳазор қадам)','Хоб 7–8 соат'],['Йога ё кашишдиҳӣ 20–30 дақиқа','Пиёдагардии сабук 30 дақиқа','Хоб 7–8 соат'],['Пиёдагардӣ 50 дақиқа','Планка 3 маротиба аз 30 сония','Хоб 7–8 соат'],['Зинапоя ё теппа боло баромадан 30 дақиқа','Кашишдиҳӣ 10 дақиқа','Хоб 7–8 соат'],['Давидани сабук 20 дақиқа','Пиёдагардӣ 20 дақиқа','Хоб 7–8 соат'],['Велосипед ё шиноварӣ 40 дақиқа','Кашишдиҳӣ 10 дақиқа','Хоб 7–8 соат'],['Пиёдагардӣ 8–10 ҳазор қадам','15 дақиқа машқҳои сабук (ғӯза, планка)','Хоб 7–8 соат']];
+const dix=x=>((dif('2026-01-01',x)%7)+7)%7;
+const GM=x=>GYM[dix(x)],RM=x=>RST[dix(x)],GK=x=>GWK[dix(x)],RK=x=>RWK[dix(x)];
+function stat(m){let days=0;Object.values(S.orders).forEach(o=>{if(o.phone===m.phone)Object.values(o.att||{}).forEach(v=>{if(v===1)days++})});
+const w=m.weights||[];const lost=w.length>1?Math.max(0,+(w[0].kg-w[w.length-1].kg).toFixed(1)):0;
+const xp=days*20+Math.round(lost*3);return{days,lost,xp,lv:Math.floor(xp/20)+1,nx:xp%20}}
+function LV(id){const m=S.members[id];if(!m)return'';const s=stat(m);return`<div class="card"><div class="row"><b>⭐ Сатҳи ${s.lv}</b><span class="mu">${s.xp} XP</span></div><div class="bar"><i style="width:${s.nx*5}%;background:var(--ac)"></i></div><div class="mu">${20-s.nx} XP то сатҳи ${s.lv+1} · омад: ${s.days} рӯз · кам шуд: ${s.lost} кг</div></div>`}
+function TP(){const L=Object.values(S.members).map(m=>({m,s:stat(m)})).sort((a,b)=>b.s.xp-a.s.xp||a.m.name.localeCompare(b.m.name));
+return`<button class="gh" onclick="go('prof')">← Бозгашт</button><h2>🏆 Рейтинг</h2><p class="mu">Ҳар рӯзи омадан = +20 XP (1 сатҳ). Ҳар 1 кг кам шудан = +3 XP.</p>`+(L.length?L.map((r,i)=>`<div class="card row" style="${r.m.phone===me?'border-color:var(--ac)':''}"><b style="width:30px">${i<3?['🥇','🥈','🥉'][i]:i+1}</b><div style="flex:1"><b>${esc(r.m.name)}</b><br><span class="mu">Омад: ${r.s.days} рӯз · кам шуд: ${r.s.lost} кг</span></div><div style="text-align:right"><b>Сатҳи ${r.s.lv}</b><br><span class="mu">${r.s.xp} XP</span></div></div>`).join(''):'<p class="mu">Ҳоло касе нест</p>')}
+function FB(){return LV(me)+`<button class="sm" style="background:var(--ac);width:100%;margin-bottom:8px" onclick="go('top')">🏆 Рейтинг</button><div class="two" style="margin-bottom:12px"><button class="sm" style="background:var(--rd)" onclick="go('bad')">🍔 Ғизои носолим</button><button class="sm" style="background:var(--gr)" onclick="go('good')">🥗 Хӯрокҳои солим</button></div>`}
+function FL(t,L,c){return`<button class="gh" onclick="go('prof')">← Бозгашт</button><h2>${t}</h2>`+L.map(g=>`<div class="card"><h2 style="color:${c}">${g[0]}</h2><div class="g3">`+g[1].map(x=>`<div class="fd"><div class="em">${x[0]}</div><div>${x[1]}</div></div>`).join('')+`</div></div>`).join('')}
+function out(){me=null;try{localStorage.removeItem('fit_me')}catch(e){}go('home')}
+function Ad(){if(!adm)return`<div class="card"><h2>Панели админ</h2><input id="pin" type="password" inputmode="numeric" placeholder="Рамз"><p class="err">${esc(err)}</p><button class="pb" onclick="apin()">Ворид</button></div>`;
+if(V.a)return AD(V.a);
+const all=Object.values(S.orders),pe=all.filter(o=>o.status==='pending');
+const cl=all.filter(o=>o.status==='active').sort((a,b)=>(info(a).rem)-(info(b).rem));
+return`<div class="tabs"><button class="${tab==='req'?'on':''}" onclick="tab='req';draw()">Дархостҳо (${pe.length})</button><button class="${tab==='cl'?'on':''}" onclick="tab='cl';draw()">Мизоҷон (${cl.length})</button><button class="${tab==='rp'?'on':''}" onclick="tab='rp';draw()">Ҳисобот</button></div>`+
+(tab==='rp'?RP():tab==='req'?(pe.length?pe.map(o=>`<div class="card"><b>${esc(o.name)}</b> <span class="mu">${esc(o.phone)}</span><br>${nm(o)} · <b>${o.price} с</b><div class="two" style="margin-top:10px"><button class="sm" style="background:var(--gr)" onclick="appr('${o.id}',1)">Қабул</button><button class="sm" style="background:var(--rd)" onclick="appr('${o.id}',0)">Рад</button></div></div>`).join(''):'<p class="mu">Дархости нав нест</p>'):
+(cl.length?cl.map(o=>{const i=info(o);return`<div class="card row" style="cursor:pointer" onclick="go('adm','${o.id}')"><span class="dot" style="background:${i.col}"></span><div style="flex:1"><b>${esc(o.name)}</b><br><span class="mu">${nm(o)}</span></div><div style="text-align:right"><b>${i.done?'тамом':i.rem+' рӯз'}</b><br><span class="dot" style="display:inline-block;width:10px;height:10px;background:${payCol(o)}"></span></div></div>`}).join(''):'<p class="mu">Мизоҷи фаъол нест</p>'))}
+let rmode='d',rdt=today(),rmo=today().slice(0,7);
+function pays(){const L=[];Object.values(S.orders).forEach(o=>(o.pays||[]).forEach(p=>L.push({d:p.d,a:p.a,s:o.slot,n:o.name})));return L}
+function RP(){const L=pays(),keys=Object.keys(SL);
+const f=rmode==='d'?L.filter(x=>x.d===rdt):L.filter(x=>x.d.startsWith(rmo));
+const sum=a=>a.reduce((t,x)=>t+x.a,0);
+let h=`<div class="tabs"><button class="${rmode==='d'?'on':''}" onclick="rmode='d';draw()">Рӯзона</button><button class="${rmode==='m'?'on':''}" onclick="rmode='m';draw()">Моҳона</button></div>`;
+h+=rmode==='d'?`<input type="date" value="${rdt}" onchange="rdt=this.value||today();draw()">`:`<input type="month" value="${rmo}" onchange="rmo=this.value||today().slice(0,7);draw()">`;
+h+=`<div class="card"><div class="mu">Ҷамъ</div><h2 style="color:var(--gr)">${sum(f)} с</h2>`+keys.map(k=>`<div class="row" style="padding:6px 0;border-top:1px solid var(--bd)"><span>${SL[k].n} <span class="mu">${SL[k].t}</span></span><b>${sum(f.filter(x=>x.s===k))} с</b></div>`).join('')+`</div>`;
+if(rmode==='m'){const ds=[...new Set(f.map(x=>x.d))].sort().reverse();h+=`<div class="card"><h2>Рӯз ба рӯз</h2>`+(ds.length?ds.map(d=>{const g=f.filter(x=>x.d===d);return`<div style="padding:8px 0;border-top:1px solid var(--bd)"><div class="row"><b>${fy(d)}</b><b>${sum(g)} с</b></div><div class="mu">${keys.map(k=>SL[k].n+': '+sum(g.filter(x=>x.s===k))).join(' · ')}</div></div>`}).join(''):'<p class="mu">Маълумот нест</p>')+`</div>`}
+else h+=`<div class="card"><h2>Пардохтҳо</h2>`+(f.length?f.map(x=>`<div class="row" style="padding:6px 0;border-top:1px solid var(--bd)"><span>${esc(x.n)} <span class="mu">${SL[x.s].n}</span></span><b>${x.a} с</b></div>`).join(''):'<p class="mu">Пардохт нест</p>')+`</div>`;
+return h}
+function apin(){if($('#pin').value===PIN){adm=true;go('adm')}else{err='Рамз нодуруст';draw()}}
+function appr(id,ok){const o=S.orders[id];if(!ok)return put('orders',id,{...o,status:'rejected'});const s=today();put('orders',id,{...o,status:'active',start:s,end:addD(s,o.total-1)})}
+function AD(id){const o=S.orders[id];if(!o)return'';const i=info(o),t=today();
+let g='',came=0,miss=0;
+for(let n=0;n<o.total;n++){const d=addD(o.start,n),sch=n%o.step===0,v=o.att&&o.att[d],fut=d>t;
+if(sch){if(v===1)came++;if(v===0)miss++}
+const bg=!sch?'':v===1?'background:var(--gr);color:#fff':v===0?'background:var(--rd);color:#fff':'';
+g+=`<div class="d ${(!sch||fut)?'off':''}" style="${bg}" ${(sch&&!fut)?`onclick="att('${id}','${d}')"`:''}>${fd(d)}<br>${sch?(v===1?'омад':v===0?'наомад':'—'):'дам'}</div>`}
+return`<button class="gh" onclick="go('adm')">← Бозгашт</button><div class="card"><h2>${esc(o.name)}</h2><div class="mu">${esc(o.phone)} · ${nm(o)}</div>${bar(i)}
+<div>Харид: <b>${fy(o.start)}</b> · Тамом: <b>${fy(o.end)}</b></div><div>Монд: <b style="color:${i.col}">${i.done?'0 рӯз':i.rem+' рӯз'}</b></div>${endMsg(i)}</div>
+<div class="card"><h2>Пардохт</h2><span class="chip" style="background:${payCol(o)}">${payTx(o)}</span><div class="two" style="margin:10px 0 0"><input id="pa" type="number" inputmode="numeric" placeholder="Маблағ (с)" style="margin:0"><button class="sm" style="background:var(--yl)" onclick="pay('${id}',0)">Илова</button></div>
+<button class="pb" style="margin-top:8px;background:var(--gr)" onclick="pay('${id}',1)">Пурра пардохт (${o.price} с)</button></div>
+<div class="card"><h2>Давомот</h2><p class="mu">Омад: ${came} · Наомад: ${miss}. Рӯзро пахш кунед.</p><div class="g">${g}</div></div>`}
+function att(id,d){const o=S.orders[id],a={...(o.att||{})},v=a[d];if(v===undefined)a[d]=1;else if(v===1)a[d]=0;else delete a[d];put('orders',id,{...o,att:a})}
+function pay(id,full){const o=S.orders[id];const p0=o.paid||0;let p;if(full)p=o.price;else{const x=parseFloat($('#pa').value);if(!x)return;p=Math.min(o.price,p0+x)}const a=p-p0;if(a<=0)return;put('orders',id,{...o,paid:p,pays:[...(o.pays||[]),{d:today(),a}]})}
+draw();
+</script></body></html>
